@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+</head>
+<style>
+    body {
+        font-family: 'Noto Sans', sans-serif;
+        font-weight:600;
+        font-size:18px;
+        margin: 0; /* 去除預設的頁面邊距 */
+        background-color: #ffffe0; /* 設定背景顏色 */
+    }
+    #errorDisplay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #aa2116;
+        font-size: 50px;
+        font-weight: bold;
+        text-align: center;
+        }
+    #topBox {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 40px; /* 上邊距設為0 */
+        background-color: #eee8aa;
+        /* background-image: url('C:/Users/User/Desktop/HandSignDetection/1.jpg');
+        background-size: cover; 調整圖片大小以填滿 .box */
+        /* background-attachment: fixed; */
+        padding: 10px; /* 設定框的內邊距 */
+        border: 1px solid #ccc; /* 設定框的邊框 */
+    }
+    h1{
+        text-align: center;
+        background: rgb(0, 0, 0, 0.5); /* 設定文字容器的背景為半透明黑色 */
+        color: white;
+        padding: 10px;
+        position: absolute; /* 新增這一行 */
+    }
+    #container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* 100% 視窗高度，可以根據需要調整 */
+    }
+
+    #videoContainer {
+        flex: 1; /* 占滿剩餘空間 */
+        position: relative;
+    }
+
+    #videoElement {
+        width: 100%;
+        height: 100%;
+    }
+
+    #resultContainer {
+        display: flex;
+        padding: 10px;
+        background-color: white; /* 背景色可依需求調整 */
+        border-radius: 5px;
+        justify-content: center;
+    }
+    #resultText {
+        width: 500px; /* 根據需要調整文本框寬度 */
+        height: 200px; /* 根據需要調整文本框高度 */
+        resize: none; /* 禁止手動調整文本框大小 */
+    }
+    .button {
+        width: 80px;
+        height: 30px;
+        margin: 0 auto; /* 將左右邊距設為 auto，實現水平置中 */
+        display: flex; /* 將 display 設為 flex，以便使用 justify-content 和 align-items */
+        justify-content: center; /* 將內容水平置中 */
+        align-items: center; /* 將內容垂直置中 */
+         /* 邊框設置 */
+        border-radius: 10px;
+        border: 0;
+        /* 背景色 */
+        background-color: 	#add8e6;
+        font-weight: bold;
+    }
+    .button-link {
+        display: inline-block;
+        padding: 10px 20px;
+        transform: translate(1300px, 40%); /* 新增這一行，以將文字容器置中 */
+        color:black; /* 文字顏色 */
+        text-decoration: none; /* 移除底線 */
+        border-radius: 5px; /* 圓角 */
+        cursor: pointer; /* 鼠標指針類型 */
+        transition: background-color 0.3s ease; /* 添加過渡效果 */
+        text-align: center; /* 文字水平置中 */
+        font-size: 30px; /* 設置文字大小 */
+    }
+
+    .button-link:hover {
+        color: orange; /* 滑鼠懸停時的文字顏色 */
+    }
+</style>
+<body>
+    <a href="index.html" class="button-link">HOME</a>
+    <div id="topBox">
+        <h1>手語辨識與翻譯系統</h1>
+    </div>
+    <div id="container">
+        <div id="videoContainer">
+            <p id="errorDisplay"></p>
+            <video id="videoElement" autoplay></video>
+        </div>
+        <!-- 在這裡顯示辨識結果 -->
+        <div id="resultContainer" style="display: flex; flex-direction: column; align-items: flex-start;">
+            
+            <h3 style= "color:whitesmoke;background:rgb(0, 0, 0, 0.7);display:inline-block;padding: 5px;">識別結果：</h3> 
+            <div style="display: flex; align-items: center;">      
+                <textarea id="resultText" readonly style="resize: none;"></textarea>
+                <h4><button class="button" id="clearButton" style="margin-left: 150px;">Clear</button></h4>
+                <h3 style= "color:whitesmoke;background:rgb(0, 0, 0, 0.7);display:inline-block;padding: 5px;margin-left: 150px;">翻譯：</h3>
+                <label id="transfer" style="margin-left: 30px;"></label>
+            </div>
+        </div>
+    </div>
+    <script>
+        var temp = "";
+        const constraints = {
+            audio: false,
+            video: {
+                facingMode: "user" // 開前鏡頭
+            }
+        };
+        
+        //加入await等待結果
+        const getCameraStream = async video => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream; // 直接將 stream 賦值給 video 的 srcObject 屬性
+            } catch (error) {
+                console.log("Something went wrong: ", error);
+
+                if (error.name === 'NotAllowedError') {
+                    // 用戶拒絕授予相機權限，顯示提示信息
+                    alert('請授予相機權限以使用此功能。');
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                } else if (error.name === 'NotFoundError' || error.name === 'NotReadableError') {
+                    alert('未找到相機或相機無法訪問。');
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                } else {
+                    alert('發生錯誤：' + error.message);
+                }
+            }
+        };
+
+        // 定義異步函式用於捕獲和上傳影像
+        const captureAndUpload = async () => {
+            // 創建 canvas 和 context
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            // 獲取 video 元素
+            var video = document.getElementById('videoElement');
+            
+            // 設定 canvas 尺寸
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // 將影像畫到 canvas 上
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 將 canvas 中的圖片轉為 Blob 對象(瀏覽器端圖片壓縮)
+            canvas.toBlob(async blob => {
+                if (blob) {
+                    // 將 Blob 对象轉為 Data URL
+                    const reader = new FileReader(); //創建一個新的 FileReader 對象，用於讀取文件或 Blob 對象的内容
+                    reader.onloadend = async () => {
+                        const compressedDataURL = reader.result; //讀取 Data URL
+                        // console.log(compressedDataURL)
+
+                        // 确認有影像後再執行 fetch
+                        if (compressedDataURL) {
+                            // 使用 fetch 傳送到後端
+                            fetch('http://127.0.0.1:5000/camera', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ image: compressedDataURL }),//屬性:base64編碼
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Recognition result:', data);
+                                
+                                if(data.error === '未檢測到手' || data.error === '多於可偵測數量'){
+                                    var Err = document.getElementById("errorDisplay");
+                                    Err.innerText = data.error;
+                                }
+                                else{
+                                    document.getElementById("errorDisplay").innerText = '';
+                                }
+                                
+                                // 取得之前的結果
+                                const previousResults = document.getElementById('resultText').value;
+                                //console.log(previousResults.length)
+
+                                // 新的結果
+                                const newResult = data.prediction;
+
+                                var trans = document.getElementById("transfer");
+                                trans.innerText = data.transfer;
+
+                                // 檢查瀏覽器是否支援 Web Speech API
+                                if ('speechSynthesis' in window) {
+                                    // 創建新的語音合成實例
+                                    var synth = window.speechSynthesis;
+
+                                     // 檢查是否有收到資料
+                                    if (data.transfer) {
+
+                                        // 創建一個新的語音合成實例
+                                        var utterance = new SpeechSynthesisUtterance(data.transfer);
+
+                                        // 語音合成的語言
+                                        utterance.lang = 'zh-TW'; // 語言選擇台灣中文
+
+                                        // 發聲
+                                        synth.speak(utterance);
+                                    } 
+                                }else {
+                                        alert('Web Speech API is not supported by this browser.');
+                                }
+                                
+                                // console.log(temp);
+                                
+                                if (temp !== newResult) {
+                                        //每50個字元換行
+                                    if (previousResults.length % 50 === 0){
+                                        document.getElementById('resultText').value += '\n';
+                                    }
+
+                                    // else if (previousResults.length % 500 === 0){
+                                    //     document.getElementById('resultText').value += '';
+                                    // }
+                                    
+                                    // 將新的結果追加到之前的結果後面，並加上換行符
+                                    document.getElementById('resultText').value += newResult;
+                                    temp = newResult;
+                                }
+                                
+                                // 綁定清空按鈕的點擊事件
+                                document.getElementById('clearButton').addEventListener('click', function () {
+                                    document.getElementById('resultText').value = '';
+                                });
+                            })
+                            .catch(error => {
+                                // console.error('Error:', error); 
+                            });
+                            
+                        }
+                    };
+
+                    // 讀取 Blob 對象
+                    reader.readAsDataURL(blob);
+                }
+            }, 'image/jpeg', 0.5); // 設置圖片格式和壓縮質量
+        };
+  
+        // 在頁面載入時獲取相機權限
+        getCameraStream(document.getElementById('videoElement'));
+
+        // 在這裡添加一個事件監聽器，當 videoElement 收到影像後執行 captureAndUpload 函數
+        document.getElementById('videoElement').addEventListener('loadeddata', function() {
+            // 開始捕獲和上傳
+            captureAndUpload();
+        });
+
+        // 每0.3秒傳送一次
+        setInterval(captureAndUpload, 500);
+
+    </script>
+
+</body>
+</html>

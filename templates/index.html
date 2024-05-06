@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hand Sign Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <style>
+      body{
+        font-family: "Noto Sans","Microsoft JhengHei";
+        font-weight:600;
+        font-size:18px;
+        margin: 0; /* 去除預設的頁面邊距 */
+        background-color: #ffffe0; /* 設定背景顏色 */
+      }
+      .box{
+        width: 100%;
+        height:100vh;
+        margin: 0 auto;/*區塊置中*/
+        margin-top: 40px; /* 上邊距設為0 */
+        background-image: url('1.jpg'); /* 替換成你的 .box 背景圖片路徑 */
+        background-size: 100% auto; /* 讓背景圖片自動縮放以符合 .box */
+        background-repeat: no-repeat; /* 防止背景圖片重複 */
+        background-position: center; /* 將背景圖片置中 */
+      }
+      h1{
+        text-align: center;
+        background: rgba(0, 0, 0, 0.5); /* 設定文字容器的背景為半透明黑色 */
+        color: white;
+        padding: 10px;
+        position: absolute; /* 新增這一行 */
+        top: 78%; /* 新增這一行，使文字容器垂直置中 */
+        left: 50%; /* 新增這一行，使文字容器水平置中 */
+        transform: translate(-50%, -50%); /* 新增這一行，以將文字容器置中 */
+      }
+      /* 樣式超連結以看起來像按鈕 */
+      .button-link {
+        display: inline-block;
+        padding: 10px 20px;
+        transform: translate(1300px, 40%); /* 新增這一行，以將文字容器置中 */
+        color:black; /* 文字顏色 */
+        text-decoration: none; /* 移除底線 */
+        border-radius: 5px; /* 圓角 */
+        cursor: pointer; /* 鼠標指針類型 */
+        transition: background-color 0.3s ease; /* 添加過渡效果 */
+        text-align: center; /* 文字水平置中 */
+        font-size: 30px; /* 設置文字大小 */
+      }
+
+      .button-link:hover {
+        color: orange; /* 滑鼠懸停時的文字顏色 */
+      }
+      .button-container {
+        display: flex; /* 使用 Flexbox 來使其內容並列排列 */
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="button-container">
+      <a href="camera.html" class="button-link">CAMERA</a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="index.html" class="button-link">HOME</a>
+  </div>
+    <div class="box"></div>
+    
+    
+  </body>
+</html>
